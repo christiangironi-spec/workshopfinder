@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Workshop Finder - MVP</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="control-panel" aria-label="Search controls">
+        <div class="brand-block">
+          <p class="eyebrow">Local search MVP</p>
+          <h1>Workshop Finder</h1>
+        </div>
+
+        <form id="searchForm" class="search-form">
+          <label>
+            Google Maps key
+            <div class="inline-field">
+              <input
+                id="apiKeyInput"
+                type="password"
+                autocomplete="off"
+                placeholder="Paste your API key"
+              />
+              <button id="loadMapsButton" type="button">Load</button>
+            </div>
+          </label>
+
+          <div class="grid-2">
+            <label>
+              Country
+              <input id="countryInput" type="text" value="Italy" autocomplete="country-name" />
+            </label>
+            <label>
+              City
+              <input id="cityInput" type="text" value="Milan" autocomplete="address-level2" />
+            </label>
+          </div>
+
+          <button id="goToCityButton" type="button" disabled>Go to city</button>
+
+          <label>
+            Search query
+            <input
+              id="keywordInput"
+              type="text"
+              value="auto repair"
+              placeholder="auto repair, tire shop, auto electrician"
+            />
+          </label>
+
+          <label>
+            Area radius: <span id="radiusValue">3.0 km</span>
+            <input id="radiusInput" type="range" min="500" max="20000" step="250" value="3000" disabled />
+          </label>
+
+          <div class="actions-row">
+            <button id="searchButton" type="submit" disabled>Search</button>
+            <button id="exportButton" type="button" disabled>CSV</button>
+          </div>
+        </form>
+
+        <div class="status-card" aria-live="polite">
+          <strong id="statusTitle">Ready</strong>
+          <p id="statusText">Enter your Google Maps key and load the map.</p>
+        </div>
+
+        <div class="tips">
+          <p>The map shows a draggable search circle. Move it and adjust the radius before searching.</p>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div id="map" class="map" role="img" aria-label="Google Map"></div>
+        <button id="sectionResizer" class="section-resizer" type="button" aria-label="Resize map and results panels"></button>
+        <section class="results-panel" aria-label="Results">
+          <div class="results-header">
+            <div>
+              <p class="eyebrow">Outcome</p>
+              <h2 id="resultCount">0 businesses</h2>
+            </div>
+            <input id="tableFilter" type="search" placeholder="Filter list" disabled />
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Address</th>
+                  <th>Phone</th>
+                  <th>Website</th>
+                  <th>Maps</th>
+                </tr>
+              </thead>
+              <tbody id="resultsBody">
+                <tr class="empty-row">
+                  <td colspan="5">No search yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js?v=20260506-1535"></script>
+  </body>
+</html>
