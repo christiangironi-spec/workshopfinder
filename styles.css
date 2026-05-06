@@ -136,7 +136,8 @@ label {
 }
 
 .status-card,
-.tips {
+.tips,
+.debug-card {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbfcfd;
@@ -154,6 +155,40 @@ label {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
+}
+
+.debug-card summary {
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.debug-card dl {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+}
+
+.debug-card div {
+  display: grid;
+  gap: 3px;
+}
+
+.debug-card dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.debug-card dd {
+  margin: 0;
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .workspace {
