@@ -27,7 +27,12 @@ const els = {
   tableFilter: document.querySelector("#tableFilter"),
   sectionResizer: document.querySelector("#sectionResizer"),
   workspace: document.querySelector(".workspace"),
+  debugOrigin: document.querySelector("#debugOrigin"),
+  debugReferrer: document.querySelector("#debugReferrer"),
+  debugError: document.querySelector("#debugError"),
 };
+
+setDebugInfo();
 
 const savedKey = localStorage.getItem("googleMapsApiKey");
 if (savedKey) {
@@ -47,6 +52,7 @@ els.loadMapsButton.addEventListener("click", () => {
   const apiKey = els.apiKeyInput.value.trim();
   if (!apiKey) {
     setStatus("Missing key", "Enter a valid Google Maps API key.", true);
+    setDebugError("No API key was entered.");
     return;
   }
 
@@ -126,6 +132,7 @@ function loadGoogleMaps(apiKey) {
   script.async = true;
   script.onerror = () => {
     setStatus("Error", "Google Maps could not be loaded. Check key, billing, and enabled APIs.", true);
+    setDebugError("Google Maps JavaScript failed to load. Check key restrictions for this origin.");
   };
   document.head.appendChild(script);
 }
@@ -200,12 +207,14 @@ async function resolveCityWithPlaces(address) {
 
     if (!places?.length || !places[0].location) {
       setStatus("Area not found", "Try a more specific name, for example 'Milan, Italy'.", true);
+      setDebugError(`No place found for "${address}".`);
       return;
     }
 
     moveMapTo(places[0].location, places[0].viewport);
   } catch (error) {
     console.error("City lookup failed", error);
+    setDebugError(readableGoogleError(error, "City lookup failed."));
     setStatus(
       "Map ready",
       "The city could not be located automatically. You can move the circle and search anyway.",
@@ -257,7 +266,8 @@ function searchPlaces() {
       console.error("Place search failed", error);
       els.searchButton.disabled = false;
       renderResults("No results found.");
-      setStatus("Search blocked", "Check that Places API (New) is enabled for this Google key.", true);
+      setDebugError(readableGoogleError(error, "Place search failed."));
+      setStatus("Search blocked", readableGoogleError(error, "Check that Places API (New) is enabled for this Google key."), true);
     });
 }
 
@@ -421,6 +431,15 @@ function setStatus(title, text, isWarning = false) {
 
 function readableGoogleError(error, fallback) {
   const message = error?.message || String(error || "");
+  if (message.includes("RefererNotAllowedMapError") || message.includes("referrer")) {
+    return `This page origin is not allowed on the Google key. Add: ${allowedReferrerPattern()}`;
+  }
+  if (message.includes("BillingNotEnabled")) {
+    return "Billing is not enabled for this Google Cloud project.";
+  }
+  if (message.includes("ApiTargetBlockedMapError")) {
+    return "The Google key is restricted to APIs that do not include Maps JavaScript API or Places API (New).";
+  }
   if (message.includes("REQUEST_DENIED") || message.includes("ApiNotActivated")) {
     return "The Google key does not have all required APIs enabled.";
   }
@@ -431,6 +450,32 @@ function readableGoogleError(error, fallback) {
     return "Google rejected the search parameters. Try a simpler search query.";
   }
   return fallback;
+}
+
+function setDebugInfo() {
+  if (!els.debugOrigin || !els.debugReferrer) {
+    return;
+  }
+
+  els.debugOrigin.textContent = window.location.origin === "null" ? window.location.href : window.location.origin;
+  els.debugReferrer.textContent = allowedReferrerPattern();
+}
+
+function setDebugError(message) {
+  if (els.debugError) {
+    els.debugError.textContent = message || "None";
+  }
+}
+
+function allowedReferrerPattern() {
+  if (window.location.protocol === "file:") {
+    return "file:// URLs cannot be restricted reliably. Prefer localhost or GitHub Pages.";
+  }
+
+  const path = window.location.pathname.endsWith("/")
+    ? window.location.pathname
+    : window.location.pathname.replace(/\/[^/]*$/, "/");
+  return `${window.location.origin}${path}*`;
 }
 
 function stringifyUri(value) {
